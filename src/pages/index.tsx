@@ -5,10 +5,10 @@ import { RiMenuFill } from 'react-icons/ri';
 
 export default function HomePage() {
   return (
-    <div className="flex h-screen w-full flex-col px-40 ">
-      <header className="h-20 w-full flex flex-row justify-between items-center">
+    <div className="flex h-screen w-full flex-col ">
+      <header className="h-20 w-full flex flex-row justify-around items-center border-b border-gray-300">
         <div>
-          <RiMenuFill className='text-xl' />
+          <RiMenuFill className='text-2xl' />
         </div>
         <div>Ultimate Blog App</div>
         <div className='flex items-center space-x-2'>
@@ -19,18 +19,20 @@ export default function HomePage() {
             <div className='w-5 h-5 bg-gray-500 rounded-full'></div>
           </div>
           <div>
-            <button className='flex justify-center items-center border border-gray-200 px-4 py-2 rounded bg-[#e3e7f0]'>
-              <div>Write </div>
+            <button className='flex justify-center items-center border border-gray-200 hover:bg-gray-600 hover:text-gray-100 px-4 py-2 rounded bg-[#e3e7f0] space-x-3 text-gray-600'>
+              <div>Write</div>
               <div>
-                <FiEdit className='mx-1' />
+                <FiEdit className='text-2xl' />
               </div>
             </button>
           </div>
         </div>
       </header>
-      <div className='grid grid-cols-3'>
+      <section className='grid grid-cols-12 place-items-center w-full h-full'>
+        <main className='col-span-8 border-r border-gray-300 w-full h-full'>this is the main part</main>
+        <aside className='col-span-4 w-full h-full'>this is used for side bar</aside>
 
-      </div>
+      </section>
 
     </div >
   )
