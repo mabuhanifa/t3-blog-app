@@ -1,4 +1,5 @@
 import { BsBell } from 'react-icons/bs';
+import { CiSearch } from 'react-icons/ci';
 import { FiEdit } from 'react-icons/fi';
 import { RiMenuFill } from 'react-icons/ri';
 
@@ -28,8 +29,26 @@ export default function HomePage() {
           </div>
         </div>
       </header>
-      <section className='grid grid-cols-12 place-items-center w-full h-full'>
-        <main className='col-span-8 border-r border-gray-300 w-full h-full'>this is the main part</main>
+      <section className='grid grid-cols-12 place-items-center w-full h-full px-20'>
+        <main className='col-span-8 border-r border-gray-300 w-full h-full'>
+          <div className='flex flex-col space-y-4 w-full p-10'>
+            <div className='flex space-x-4 items-center relative'>
+              <CiSearch className='absolute flex items-center left-5 text-xl' />
+              <input
+                type="text"
+                name='search'
+                id='search'
+                className='px-6 py-2 bg-gray-300 rounded' />
+            </div>
+            <div className='flex '>
+              <div>My Topics</div>
+              <div>all tags are here</div>
+            </div>
+          </div>
+          <div>
+
+          </div>
+        </main>
         <aside className='col-span-4 w-full h-full'>this is used for side bar</aside>
 
       </section>
