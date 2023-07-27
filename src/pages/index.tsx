@@ -70,11 +70,11 @@ export default function HomePage() {
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex flex-col border-b p-5 last:border-none"
+                className="group flex flex-col space-y-8 border-b p-5 pb-8 last:border-none"
               >
                 <div className="grid-col-12 grid w-full grid-cols-12 ">
                   <div className="col-span-8 text-gray-600">
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-2xl font-bold text-gray-800 group-hover:underline">
                       Lorem, ipsum dolor sit amet consectetur adipisicing elit.
                       Nulla, eligendi minus beatae eius eaque at?
                     </h1>
@@ -87,7 +87,7 @@ export default function HomePage() {
                     nam consectetur dignissimos quae ducimus enim, et quo minima
                     incidunt nemo minus. Tenetur!
                   </div>
-                  <div className="col-span-4 h-full w-full rounded-xl bg-gray-300 p-5"></div>
+                  <div className="col-span-4 h-full w-full transform rounded-xl bg-gray-300 p-5 transition group-hover:scale-105"></div>
                 </div>
                 <div>
                   <div className="flex w-full items-center ">
@@ -96,7 +96,7 @@ export default function HomePage() {
                       {Array.from({ length: 5 }).map((_, index) => (
                         <div key={index} className="flex flex-col space-y-5 ">
                           <div className="flex h-10 w-20 items-center justify-center rounded-3xl bg-gray-300 p-5">
-                            {index + 1}
+                            Tag {index + 1}
                           </div>
                         </div>
                       ))}
