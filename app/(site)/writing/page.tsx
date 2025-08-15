@@ -10,7 +10,6 @@ export const metadata = {
 
 export default async function Page() {
   const posts = await getPosts("writing");
-  console.log(posts);
 
   return (
     <section className="max-w-6xl mx-auto px-4 md:px-6 py-10">
