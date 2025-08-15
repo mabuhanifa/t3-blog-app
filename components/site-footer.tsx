@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const footerItems = [
   { href: "/", label: "Home" },
@@ -12,30 +12,33 @@ const footerItems = [
   { href: "/travel", label: "Travel" },
   { href: "/movies", label: "Movies" },
   { href: "/about", label: "About" },
-]
+];
 
 export function SiteFooter() {
-  const pathname = usePathname()
-  const year = new Date().getFullYear()
+  const pathname = usePathname();
+  const year = new Date().getFullYear();
 
   return (
     <footer className="border-t border-stone-200 dark:border-stone-800">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 text-xs text-stone-500">
         <nav className="flex flex-wrap items-center justify-center gap-4 mb-4">
           {footerItems.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-sm",
-                  active && "text-emerald-600",
+                  active && "text-emerald-600"
                 )}
               >
                 {item.label}
               </Link>
-            )
+            );
           })}
         </nav>
         <p className="text-center mb-6">
@@ -76,5 +79,5 @@ export function SiteFooter() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

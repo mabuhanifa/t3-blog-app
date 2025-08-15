@@ -1,6 +1,6 @@
 export function Pagination() {
   return (
-    <nav aria-label="Pagination" className="mt-10">
+    <nav aria-label="Pagination" className="my-10">
       <ul className="flex items-center justify-center gap-2 text-sm">
         <li>
           <a
@@ -44,5 +44,5 @@ export function Pagination() {
         </li>
       </ul>
     </nav>
-  )
+  );
 }
