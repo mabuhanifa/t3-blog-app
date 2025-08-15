@@ -66,5 +66,6 @@ export async function getPosts(category?: string) {
       : "Date not available",
     readTime: post.readTime || "N/A",
     tags: post.tags,
+    author: post.author, // Add the author object here
   }));
 }
