@@ -1,82 +1,82 @@
-import { FilterBar } from "@/components/filter-bar"
-import { PostCard } from "@/components/post-card"
-import { Pagination } from "@/components/pagination"
+import { FilterBar } from "@/components/filter-bar";
+import { Pagination } from "@/components/pagination";
+import { PostCard } from "@/components/post-card";
+import { format } from "date-fns";
 
 export const metadata = {
   title: "North Blog — Movies",
   description: "Movies at North Blog: reviews, frames, and film notes.",
+};
+
+// Define types for the API response. In a real app, these might be in a shared types file.
+type Tag = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Author = {
+  name: string | null;
+  image: string | null;
+};
+
+type Post = {
+  id: number;
+  title: string;
+  slug: string;
+  coverImageUrl: string | null;
+  description: string | null;
+  readTime: string | null;
+  publishedAt: string | null; // It will be a string after JSON serialization
+  author: Author;
+  category: Category;
+  tags: Tag[];
+};
+
+async function getPosts() {
+  // The base URL should be in an environment variable (e.g., process.env.NEXT_PUBLIC_APP_URL)
+  const res = await fetch("http://localhost:3000/api/posts", {
+    cache: "no-store", // Use 'no-store' for development to see changes on refresh
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch posts");
+  }
+
+  const posts: Post[] = await res.json();
+
+  // Filter for 'Movies' category and map to the format required by PostCard
+  return posts
+    .filter((post) => post.category.slug === "movies")
+    .map((post) => ({
+      slug: post.slug,
+      label: post.category.name,
+      image: post.coverImageUrl || "https://picsum.photos/800/600",
+      imageAlt: post.title,
+      title: post.title,
+      description: post.description || "",
+      avatar: post.author.image || "https://picsum.photos/40",
+      dateISO: post.publishedAt
+        ? new Date(post.publishedAt).toISOString()
+        : new Date().toISOString(),
+      dateText: post.publishedAt
+        ? format(new Date(post.publishedAt), "MMM d, yyyy")
+        : "Date not available",
+      readTime: post.readTime || "N/A",
+      tags: post.tags,
+    }));
 }
 
-const posts = [
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=501",
-    imageAlt: "Cinema screen glowing in dark theater",
-    title: "Afterlight",
-    description: "A study of endings that don’t end.",
-    avatar: "https://picsum.photos/40?random=511",
-    dateISO: "2024-05-11",
-    dateText: "May 11, 2024",
-    readTime: "6 min read",
-  },
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=502",
-    imageAlt: "Neon-lit street scene at night",
-    title: "Midnight Maps",
-    description: "City stories told by reflections and rain.",
-    avatar: "https://picsum.photos/40?random=512",
-    dateISO: "2024-05-01",
-    dateText: "May 1, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=503",
-    imageAlt: "Old film reel on table",
-    title: "Grain Theory",
-    description: "Why texture still matters in a smooth world.",
-    avatar: "https://picsum.photos/40?random=513",
-    dateISO: "2024-04-24",
-    dateText: "Apr 24, 2024",
-    readTime: "7 min read",
-  },
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=504",
-    imageAlt: "Projector light beam in dust",
-    title: "Dust & Light",
-    description: "Projection as ritual, not just playback.",
-    avatar: "https://picsum.photos/40?random=514",
-    dateISO: "2024-04-17",
-    dateText: "Apr 17, 2024",
-    readTime: "4 min read",
-  },
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=505",
-    imageAlt: "Close-up of clapperboard",
-    title: "Scene, Set",
-    description: "On the quiet leadership of a good slate.",
-    avatar: "https://picsum.photos/40?random=515",
-    dateISO: "2024-04-11",
-    dateText: "Apr 11, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Movies",
-    image: "https://picsum.photos/800/600?random=506",
-    imageAlt: "Empty theater seats",
-    title: "Quiet Audience",
-    description: "Why silence is the best special effect.",
-    avatar: "https://picsum.photos/40?random=516",
-    dateISO: "2024-04-03",
-    dateText: "Apr 3, 2024",
-    readTime: "6 min read",
-  },
-]
+export default async function Page() {
+  const posts = await getPosts();
 
-export default function Page() {
   return (
     <section className="max-w-6xl mx-auto px-4 md:px-6 py-10">
       <div className="mb-8">
@@ -94,12 +94,12 @@ export default function Page() {
       <FilterBar />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((p, i) => (
-          <PostCard key={i} {...p} />
+        {posts.map((p) => (
+          <PostCard key={p.slug} {...p} />
         ))}
       </section>
 
       <Pagination />
     </section>
-  )
+  );
 }

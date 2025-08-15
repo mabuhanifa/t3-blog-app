@@ -1,82 +1,82 @@
-import { FilterBar } from "@/components/filter-bar"
-import { PostCard } from "@/components/post-card"
-import { Pagination } from "@/components/pagination"
+import { FilterBar } from "@/components/filter-bar";
+import { Pagination } from "@/components/pagination";
+import { PostCard } from "@/components/post-card";
+import { format } from "date-fns";
 
 export const metadata = {
   title: "North Blog — Photography",
   description: "Photography at North Blog: images, field notes, and gear talk.",
+};
+
+// Define types for the API response. In a real app, these might be in a shared types file.
+type Tag = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Author = {
+  name: string | null;
+  image: string | null;
+};
+
+type Post = {
+  id: number;
+  title: string;
+  slug: string;
+  coverImageUrl: string | null;
+  description: string | null;
+  readTime: string | null;
+  publishedAt: string | null; // It will be a string after JSON serialization
+  author: Author;
+  category: Category;
+  tags: Tag[];
+};
+
+async function getPosts() {
+  // The base URL should be in an environment variable (e.g., process.env.NEXT_PUBLIC_APP_URL)
+  const res = await fetch("http://localhost:3000/api/posts", {
+    cache: "no-store", // Use 'no-store' for development to see changes on refresh
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch posts");
+  }
+
+  const posts: Post[] = await res.json();
+
+  // Filter for 'Photography' category and map to the format required by PostCard
+  return posts
+    .filter((post) => post.category.slug === "photography")
+    .map((post) => ({
+      slug: post.slug,
+      label: post.category.name,
+      image: post.coverImageUrl || "https://picsum.photos/800/600",
+      imageAlt: post.title,
+      title: post.title,
+      description: post.description || "",
+      avatar: post.author.image || "https://picsum.photos/40",
+      dateISO: post.publishedAt
+        ? new Date(post.publishedAt).toISOString()
+        : new Date().toISOString(),
+      dateText: post.publishedAt
+        ? format(new Date(post.publishedAt), "MMM d, yyyy")
+        : "Date not available",
+      readTime: post.readTime || "N/A",
+      tags: post.tags,
+    }));
 }
 
-const posts = [
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=301",
-    imageAlt: "Camera on trail overlooking valley",
-    title: "Meter by Ear",
-    description: "Trusting your eye when the meter lies.",
-    avatar: "https://picsum.photos/40?random=311",
-    dateISO: "2024-05-08",
-    dateText: "May 8, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=302",
-    imageAlt: "Night street with neon reflections",
-    title: "Neon Rain",
-    description: "Shooting color when the night is all glass.",
-    avatar: "https://picsum.photos/40?random=312",
-    dateISO: "2024-04-29",
-    dateText: "Apr 29, 2024",
-    readTime: "6 min read",
-  },
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=303",
-    imageAlt: "Macro of leaf veins",
-    title: "Close Enough",
-    description: "When macro turns the ordinary into maps.",
-    avatar: "https://picsum.photos/40?random=313",
-    dateISO: "2024-04-22",
-    dateText: "Apr 22, 2024",
-    readTime: "4 min read",
-  },
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=304",
-    imageAlt: "Snowy mountain under stars",
-    title: "Cold Stars",
-    description: "Astro tips for thin air and thick gloves.",
-    avatar: "https://picsum.photos/40?random=314",
-    dateISO: "2024-04-16",
-    dateText: "Apr 16, 2024",
-    readTime: "8 min read",
-  },
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=305",
-    imageAlt: "Portrait in window light",
-    title: "Window North",
-    description: "Portraits that keep the quiet in the room.",
-    avatar: "https://picsum.photos/40?random=315",
-    dateISO: "2024-04-08",
-    dateText: "Apr 8, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Photography",
-    image: "https://picsum.photos/800/600?random=306",
-    imageAlt: "Foggy street with lone cyclist",
-    title: "Weather Stories",
-    description: "How fog edits the city into prose.",
-    avatar: "https://picsum.photos/40?random=316",
-    dateISO: "2024-03-30",
-    dateText: "Mar 30, 2024",
-    readTime: "6 min read",
-  },
-]
+export default async function Page() {
+  const posts = await getPosts();
 
-export default function Page() {
   return (
     <section className="max-w-6xl mx-auto px-4 md:px-6 py-10">
       <div className="mb-8">
@@ -94,13 +94,13 @@ export default function Page() {
       <FilterBar />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        {posts.map((p, i) => (
-          <PostCard key={i} {...p} />
+        {posts.map((p) => (
+          <PostCard key={p.slug} {...p} />
         ))}
       </section>
 
       {/* Gallery strip */}
-      <section aria-label="Gallery strip" className="mb-10">
+      {/* <section aria-label="Gallery strip" className="mb-10">
         <h3 className="font-bold mb-3">Contact Sheets</h3>
         <div className="flex overflow-x-auto whitespace-nowrap gap-3 py-1">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -112,9 +112,9 @@ export default function Page() {
             />
           ))}
         </div>
-      </section>
+      </section> */}
 
       <Pagination />
     </section>
-  )
+  );
 }

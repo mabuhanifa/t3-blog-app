@@ -1,82 +1,83 @@
-import { FilterBar } from "@/components/filter-bar"
-import { PostCard } from "@/components/post-card"
-import { Pagination } from "@/components/pagination"
+import { FilterBar } from "@/components/filter-bar";
+import { Pagination } from "@/components/pagination";
+import { PostCard } from "@/components/post-card";
+import { format } from "date-fns";
 
 export const metadata = {
   title: "North Blog — Travel",
-  description: "Travel at North Blog: field guides, routes, and slow itineraries.",
+  description:
+    "Travel at North Blog: field guides, routes, and slow itineraries.",
+};
+
+// Define types for the API response. In a real app, these might be in a shared types file.
+type Tag = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+type Author = {
+  name: string | null;
+  image: string | null;
+};
+
+type Post = {
+  id: number;
+  title: string;
+  slug: string;
+  coverImageUrl: string | null;
+  description: string | null;
+  readTime: string | null;
+  publishedAt: string | null; // It will be a string after JSON serialization
+  author: Author;
+  category: Category;
+  tags: Tag[];
+};
+
+async function getPosts() {
+  // The base URL should be in an environment variable (e.g., process.env.NEXT_PUBLIC_APP_URL)
+  const res = await fetch("http://localhost:3000/api/posts", {
+    cache: "no-store", // Use 'no-store' for development to see changes on refresh
+  });
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch posts");
+  }
+
+  const posts: Post[] = await res.json();
+
+  // Filter for 'Travel' category and map to the format required by PostCard
+  return posts
+    .filter((post) => post.category.slug === "travel")
+    .map((post) => ({
+      slug: post.slug,
+      label: post.category.name,
+      image: post.coverImageUrl || "https://picsum.photos/800/600",
+      imageAlt: post.title,
+      title: post.title,
+      description: post.description || "",
+      avatar: post.author.image || "https://picsum.photos/40",
+      dateISO: post.publishedAt
+        ? new Date(post.publishedAt).toISOString()
+        : new Date().toISOString(),
+      dateText: post.publishedAt
+        ? format(new Date(post.publishedAt), "MMM d, yyyy")
+        : "Date not available",
+      readTime: post.readTime || "N/A",
+      tags: post.tags,
+    }));
 }
 
-const posts = [
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=401",
-    imageAlt: "Clover path through meadow",
-    title: "Meadow Ways",
-    description: "A footpath between hedgerows and timekeeping cows.",
-    avatar: "https://picsum.photos/40?random=411",
-    dateISO: "2024-05-07",
-    dateText: "May 7, 2024",
-    readTime: "6 min read",
-  },
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=402",
-    imageAlt: "Coastal footpath with lighthouse",
-    title: "Lighthouse Loop",
-    description: "A two-day circuit with gulls and sudden fog.",
-    avatar: "https://picsum.photos/40?random=412",
-    dateISO: "2024-04-27",
-    dateText: "Apr 27, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=403",
-    imageAlt: "Map and a compass on wood",
-    title: "Compass Grammar",
-    description: "Finding bearings when the trail says “maybe.”",
-    avatar: "https://picsum.photos/40?random=413",
-    dateISO: "2024-04-20",
-    dateText: "Apr 20, 2024",
-    readTime: "7 min read",
-  },
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=404",
-    imageAlt: "Train window looking over fields",
-    title: "Rail North",
-    description: "Notes on the art of the train window itinerary.",
-    avatar: "https://picsum.photos/40?random=414",
-    dateISO: "2024-04-12",
-    dateText: "Apr 12, 2024",
-    readTime: "4 min read",
-  },
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=405",
-    imageAlt: "Backpack on a ridge",
-    title: "Carry Less",
-    description: "Packing lists that prioritize attention over gear.",
-    avatar: "https://picsum.photos/40?random=415",
-    dateISO: "2024-04-06",
-    dateText: "Apr 6, 2024",
-    readTime: "5 min read",
-  },
-  {
-    label: "Travel",
-    image: "https://picsum.photos/800/600?random=406",
-    imageAlt: "City alley with morning light",
-    title: "Alley Atlas",
-    description: "Urban rambling and the geometry of detours.",
-    avatar: "https://picsum.photos/40?random=416",
-    dateISO: "2024-03-29",
-    dateText: "Mar 29, 2024",
-    readTime: "6 min read",
-  },
-]
+export default async function Page() {
+  const posts = await getPosts();
 
-export default function Page() {
   return (
     <section className="max-w-6xl mx-auto px-4 md:px-6 py-10">
       <div className="mb-8">
@@ -94,12 +95,12 @@ export default function Page() {
       <FilterBar />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((p, i) => (
-          <PostCard key={i} {...p} />
+        {posts.map((p) => (
+          <PostCard key={p.slug} {...p} />
         ))}
       </section>
 
       <Pagination />
     </section>
-  )
+  );
 }
