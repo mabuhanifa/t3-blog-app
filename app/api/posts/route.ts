@@ -26,6 +26,42 @@ const postCreateSchema = z.object({
   readTime: z.string().optional(),
 });
 
+export async function GET(req: Request) {
+  try {
+    const allPosts = await db.query.posts.findMany({
+      with: {
+        author: {
+          columns: {
+            name: true,
+            image: true,
+          },
+        },
+        category: true,
+        postsToTags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: (posts, { desc }) => [desc(posts.publishedAt)],
+    });
+
+    // Transform the data to create a cleaner 'tags' array
+    const postsWithCleanTags = allPosts.map((post) => {
+      const { postsToTags, ...rest } = post;
+      return {
+        ...rest,
+        tags: postsToTags.map((pt) => pt.tag),
+      };
+    });
+
+    return NextResponse.json(postsWithCleanTags);
+  } catch (error) {
+    console.error("[POSTS_GET]", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
