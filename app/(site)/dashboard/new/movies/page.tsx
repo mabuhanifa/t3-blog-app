@@ -1,12 +1,21 @@
-import { SimplePostForm } from "@/components/forms/simple-post-form"
+import { SimplePostForm } from "@/components/forms/simple-post-form";
 
-export const metadata = { title: "New Movies Post — Dashboard" }
+type Tag = {
+  id: number;
+  name: string;
+  slug: string;
+};
 
-export default function Page() {
-  return (
-    <div>
-      <h3 className="font-bold text-lg mb-3">Movies Post</h3>
-      <SimplePostForm category="Movies" />
-    </div>
-  )
+async function getTags(): Promise<Tag[]> {
+  const res = await fetch("http://localhost:3000/api/tags", {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch tags");
+  return res.json();
+}
+
+export default async function Page() {
+  const tags = await getTags();
+
+  return <SimplePostForm category="Movies" allTags={tags} />;
 }
