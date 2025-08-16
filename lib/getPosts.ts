@@ -32,8 +32,11 @@ type Post = {
 };
 
 export async function getPosts(category?: string) {
+  const baseUrl = "http://localhost:3000/api/posts";
+  const url = category ? `${baseUrl}?category=${category}` : baseUrl;
+
   // The base URL should be in an environment variable (e.g., process.env.NEXT_PUBLIC_APP_URL)
-  const res = await fetch("http://localhost:3000/api/posts", {
+  const res = await fetch(url, {
     cache: "no-store", // Use 'no-store' for development to see changes on refresh
   });
 
@@ -44,13 +47,8 @@ export async function getPosts(category?: string) {
 
   const posts: Post[] = await res.json();
 
-  // If a category is provided, filter the posts. Otherwise, use all posts.
-  const filteredPosts = category
-    ? posts.filter((post) => post.category.slug === category)
-    : posts;
-
-  // Map the posts to the format required by the PostCard component
-  return filteredPosts.map((post) => ({
+  // Filtering is now done by the API. We just need to map the data.
+  return posts.map((post) => ({
     slug: post.slug,
     label: post.category.name,
     image: post.coverImageUrl || "https://picsum.photos/800/600",
@@ -66,6 +64,6 @@ export async function getPosts(category?: string) {
       : "Date not available",
     readTime: post.readTime || "N/A",
     tags: post.tags,
-    author: post.author, // Add the author object here
+    author: post.author,
   }));
 }

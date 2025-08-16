@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { posts } from "@/lib/db/schema";
+import { categories, posts, postsToTags } from "@/lib/db/schema";
+import { eq, SQL } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -24,11 +25,32 @@ const postCreateSchema = z.object({
   content: z.string().optional(),
   description: z.string().optional(),
   readTime: z.string().optional(),
+  tags: z.array(z.number()).optional(),
 });
 
 export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const categorySlug = searchParams.get("category");
+
+    let categoryFilter: SQL | undefined = undefined;
+
+    if (categorySlug) {
+      // Find the category ID from the slug
+      const category = await db.query.categories.findFirst({
+        where: eq(categories.slug, categorySlug),
+        columns: { id: true },
+      });
+
+      if (!category) {
+        // If category doesn't exist, return an empty array as no posts can be found.
+        return NextResponse.json([]);
+      }
+      categoryFilter = eq(posts.categoryId, category.id);
+    }
+
     const allPosts = await db.query.posts.findMany({
+      where: categoryFilter,
       with: {
         author: {
           columns: {
@@ -85,26 +107,39 @@ export async function POST(req: Request) {
       content,
       description,
       readTime,
+      tags,
     } = parsedBody.data;
 
     const slug = slugify(title);
 
-    const newPost = await db
-      .insert(posts)
-      .values({
-        title,
-        slug,
-        authorId: session.user.id,
-        categoryId,
-        coverImageUrl,
-        publishedAt: date ? new Date(date) : new Date(),
-        content,
-        description,
-        readTime,
-      })
-      .returning();
+    const newPost = await db.transaction(async (tx) => {
+      const [createdPost] = await tx
+        .insert(posts)
+        .values({
+          title,
+          slug,
+          authorId: session.user.id,
+          categoryId,
+          coverImageUrl,
+          publishedAt: date ? new Date(date) : new Date(),
+          content,
+          description,
+          readTime,
+        })
+        .returning();
 
-    return NextResponse.json(newPost[0]);
+      if (tags && tags.length > 0) {
+        const tagsToInsert = tags.map((tagId) => ({
+          postId: createdPost.id,
+          tagId: tagId,
+        }));
+        await tx.insert(postsToTags).values(tagsToInsert);
+      }
+
+      return createdPost;
+    });
+
+    return NextResponse.json(newPost);
   } catch (error) {
     // Handle potential database errors, e.g., unique constraint violation for the slug
     if (
